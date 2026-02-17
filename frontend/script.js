@@ -242,7 +242,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch(`${API_BASE_URL}/api/search/outscraper`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ keyword, location, limit: 20 })
+                body: JSON.stringify({ keyword, location, limit: 50 })
             });
 
             const data = await response.json();
