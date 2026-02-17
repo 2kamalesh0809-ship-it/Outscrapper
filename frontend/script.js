@@ -291,11 +291,6 @@ document.addEventListener('DOMContentLoaded', () => {
     exportExcelBtn.addEventListener('click', () => exportData('excel'));
     exportPdfBtn.addEventListener('click', () => exportData('pdf'));
 
-    // Export functionality
-    exportCsvBtn.addEventListener('click', () => exportData('csv'));
-    exportExcelBtn.addEventListener('click', () => exportData('excel'));
-    exportPdfBtn.addEventListener('click', () => exportData('pdf'));
-
     function exportData(format) {
         if (leadsData.length === 0) {
             showToast('No data to export', 'error');
