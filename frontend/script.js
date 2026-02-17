@@ -291,26 +291,65 @@ document.addEventListener('DOMContentLoaded', () => {
     exportExcelBtn.addEventListener('click', () => exportData('excel'));
     exportPdfBtn.addEventListener('click', () => exportData('pdf'));
 
+    // Export functionality
+    exportCsvBtn.addEventListener('click', () => exportData('csv'));
+    exportExcelBtn.addEventListener('click', () => exportData('excel'));
+    exportPdfBtn.addEventListener('click', () => exportData('pdf'));
+
     function exportData(format) {
-        if (leadsData.length === 0) return;
-        const csvContent = "data:text/csv;charset=utf-8," +
-            "Name,Phone,Address,Website\n" +
-            leadsData.map(l => `${escapeCSV(l.name)},${escapeCSV(l.phone)},${escapeCSV(l.address)},${escapeCSV(l.website)}`).join("\n");
-        const encodedUri = encodeURI(csvContent);
-        const link = document.createElement("a");
-        link.setAttribute("href", encodedUri);
-        link.setAttribute("download", `google_maps_leads.${format}`);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        if (leadsData.length === 0) {
+            showToast('No data to export', 'error');
+            return;
+        }
+
+        const headers = ["Name", "Phone No", "Address", "Website"];
+        const rows = leadsData.map(lead => [
+            lead.name || 'N/A',
+            lead.phone || 'N/A',
+            lead.address || 'N/A',
+            lead.website || 'N/A'
+        ]);
+
+        const fileName = `google_maps_leads_${new Date().toISOString().slice(0, 10)}`;
+
+        if (format === 'csv') {
+            const csvRows = [headers.join(',')];
+            rows.forEach(row => {
+                csvRows.push(row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','));
+            });
+            const csvContent = csvRows.join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            triggerDownload(blob, `${fileName}.csv`);
+        } else if (format === 'excel') {
+            const worksheet = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Leads");
+            XLSX.writeFile(workbook, `${fileName}.xlsx`);
+        } else if (format === 'pdf') {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            doc.text("Google Maps Business Leads", 14, 15);
+            doc.autoTable({
+                startY: 20,
+                head: [headers],
+                body: rows,
+                theme: 'striped',
+                headStyles: { fillColor: [139, 94, 60] } // Theme primary color
+            });
+            doc.save(`${fileName}.pdf`);
+        }
     }
 
-    function escapeCSV(str) {
-        if (!str) return '';
-        const stringValue = String(str);
-        if (stringValue.includes(',') || stringValue.includes('"') || stringValue.includes('\n')) {
-            return `"${stringValue.replace(/"/g, '""')}"`;
+    function triggerDownload(blob, filename) {
+        const link = document.createElement("a");
+        if (link.download !== undefined) {
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", filename);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
-        return stringValue;
     }
 });
