@@ -16,7 +16,7 @@ const scrapeController = async (req, res) => {
         const normalizedLocation = location.trim().toLowerCase();
 
         // 2. Call SerpApi Service (No startOffset/DB history checks needed for clean personal search)
-        const requestedLimit = parseInt(limit) || 500;
+        const requestedLimit = parseInt(limit) || 20;
         console.log(`[ScrapeController] Request via SerpApi: ${keyword} in ${location} | Target Limit: ${requestedLimit}`);
 
         const leads = await searchGoogleMaps(normalizedKeyword, normalizedLocation, 0, requestedLimit);
